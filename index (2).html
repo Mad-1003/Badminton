@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#2563eb" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>KRIBB 배드민턴 대회 팀 자동 생성기</title>
+<style>
+  body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f6f7fb;color:#111} .wrap{max-width:1320px;margin:0 auto;padding:24px}
+  h1{margin:0 0 10px;font-size:28px} h2{margin-top:28px;border-left:6px solid #2563eb;padding-left:10px} h3{margin:18px 0 8px}
+  .card{background:white;border:1px solid #ddd;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 2px 8px #0000000d}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  input,select,button,textarea{font-size:15px;padding:9px;border:1px solid #bbb;border-radius:8px}button{background:#2563eb;color:white;border:0;cursor:pointer;font-weight:700}button.secondary{background:#666}button.danger{background:#dc2626}button.green{background:#16a34a}button.purple{background:#7c3aed}button:disabled{background:#aaa}
+  table{border-collapse:collapse;width:100%;background:white;margin:8px 0}th,td{border:1px solid #333;padding:8px;text-align:center;vertical-align:middle}th{background:#f1f5f9}.small{font-size:13px;color:#555}.warn{color:#dc2626;font-weight:700}.ok{color:#15803d;font-weight:700}
+  .teamBox{display:inline-block;border:1px solid #ddd;border-radius:8px;padding:6px 10px;margin:4px;background:#fafafa}.printOnly{display:none}
+  .bracket{display:flex;gap:28px;overflow:auto;padding:14px;background:white;border:1px solid #ddd;border-radius:12px}.round{min-width:210px;display:flex;flex-direction:column;justify-content:space-around;gap:18px}.match{border:2px solid #111;border-radius:8px;background:#fff}.match .title{background:#f1f5f9;padding:5px;font-weight:700;text-align:center;border-bottom:1px solid #111}.slot{min-height:38px;padding:8px;border-top:1px solid #ccc}.slot:first-of-type{border-top:0}.bye{color:#888}.yellow{background:#fff200;font-weight:800}.editable{background:#fffdf0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;position:sticky;top:0;background:#f6f7fb;padding:10px 0;z-index:10}.tabs button{background:#e5e7eb;color:#111}.tabs button.active{background:#2563eb;color:white}.mainTab,.resultTab{display:none}.mainTab.active,.resultTab.active{display:block}
+
+  /* Mobile-friendly layout */
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{overflow-x:hidden}
+  input,select,button,textarea{box-sizing:border-box;max-width:100%}
+  button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .tableScroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+  @media (max-width: 760px){
+    .wrap{padding:12px;max-width:none}
+    h1{font-size:22px;line-height:1.25;margin-bottom:6px}
+    h2{font-size:18px;margin-top:18px}
+    h3{font-size:16px}
+    .card{padding:12px;border-radius:12px;margin:10px 0}
+    .grid{grid-template-columns:1fr;gap:9px}
+    .grid label{display:block;font-weight:700;font-size:13px;color:#333}
+    .grid input,.grid select{margin-top:5px;width:100%}
+    .row{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch}
+    .row > input,.row > select,.row > button,.row > textarea{width:100%;min-width:0!important}
+    input,select,button,textarea{font-size:16px;padding:12px;border-radius:10px}
+    button{min-height:46px;white-space:normal;line-height:1.2}
+    .tabs{position:sticky;top:0;display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px 0;margin:10px -12px 12px;background:#f6f7fb;box-shadow:0 2px 8px #00000012;scroll-snap-type:x proximity}
+    .tabs button{flex:0 0 auto;min-width:132px;font-size:13px;padding:10px 12px;scroll-snap-align:start}
+    table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;font-size:13px}
+    th,td{padding:7px 6px}
+    .bracket{gap:12px;padding:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .round{min-width:180px;gap:12px}
+    .match .title{font-size:13px}.slot{min-height:32px;padding:7px;font-size:13px}
+    .teamBox{font-size:13px;padding:5px 8px}
+    .small{font-size:12px;line-height:1.45}
+    #savedRoster,#rosterName{min-width:0!important}
+    textarea#bulkParticipants{min-height:180px}
+  }
+  @media (max-width: 420px){
+    .tabs button{min-width:118px;font-size:12px;padding:9px 10px}
+    h1{font-size:20px}
+    table{font-size:12px}
+    th,td{padding:6px 5px}
+  }
+
+  @media print{body{background:white}.noPrint{display:none!important}.card{box-shadow:none;border:0}.wrap{max-width:none;padding:10px}.printOnly{display:block} h2{break-before:page}.bracket{border:0}.scheduleTable{font-size:12px}input,select,button{display:none}.editable{background:white}}
+</style>
+
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body><div class="wrap">
+<h1>🏸 KRIBB 배드민턴 대회 팀 자동 생성기</h1>
+<div class="small">예선 · 토너먼트 · 자동 시간표 생성 시스템</div>
+
+<div class="card noPrint" style="background:#eff6ff;border-color:#bfdbfe">
+  <b>📱 모바일 사용 안내</b>
+  <div class="small" style="margin-top:6px">핸드폰에서는 상단 메뉴를 좌우로 밀어서 탭을 선택할 수 있습니다. 입력칸과 표는 모바일 화면에 맞게 자동 조정됩니다.</div>
+</div>
+
+<div class="tabs noPrint" id="mainMenu">
+  <button class="active" onclick="showMainTab('settingsTab', this)">1. 기본 설정</button>
+  <button onclick="showMainTab('participantsTab', this)">2. 참가자 입력 / 저장 명단</button>
+  <button onclick="showMainTab('generateTab', this)">3. 생성 설정</button>
+  <button onclick="showMainTab('resultsTab', this)">4. 결과 / 시간표 / 대진표</button>
+</div>
+
+<div id="settingsTab" class="mainTab active card noPrint">
+  <h2>1. 기본 설정</h2>
+  <div class="grid">
+    <label>대회명<input id="eventTitle" value="" placeholder="예: 제 2회 KRIBB 배드민턴 정기대회"></label>
+    <label>날짜<input id="eventDate" value="" placeholder="예: 2026. 4. 23"></label>
+    <label>코트 수<input id="courtCount" type="number" min="1" value="" placeholder="예: 3"></label>
+    <label>시작 시간<input id="startTime" type="time" value=""></label>
+    <label>경기 시간(분)<input id="matchMinutes" type="number" min="5" value="" placeholder="예: 15"></label>
+    <label>팀 방식<select id="teamMode"><option value="" selected>선택하세요</option><option value="fixed">처음 정한 팀 계속 사용</option><option value="rotate">경기마다 팀 변경</option></select></label>
+    <label>팀 실력 배정<select id="skillMode"><option value="" selected>선택하세요</option><option value="ignore">실력 무시</option><option value="similar">비슷한 실력끼리</option><option value="different">다른 실력끼리</option><option value="balanced">평균 실력 균등</option></select></label>
+    <label>예선 경기 수<select id="prelimMatchMode" onchange="updatePrelimControls()"><option value="" selected>선택하세요</option><option value="0">예선 없음</option><option value="full">풀리그: 조 안 모든 팀끼리</option><option value="1">팀당 1경기</option><option value="2">팀당 2경기</option><option value="3">팀당 3경기</option><option value="4">팀당 4경기</option></select></label>
+    <label id="groupCountWrap">예선 조 수<input id="groupCount" type="number" min="1" value="" placeholder="예: 2"></label>
+    <label id="advanceCountWrap">토너먼트 진출<select id="advanceCount"><option value="" selected>선택하세요</option><option value="2">각 조 상위 2팀</option><option value="1">각 조 상위 1팀</option></select></label>
+    <label>혼복 팀 수 기준<select id="mixedTeamBasis"><option value="" selected>선택하세요</option><option value="max">많은 성별 기준</option><option value="min">적은 성별 기준</option></select></label>
+    <label>홀수 인원 중복 참여<select id="allowDuplicate"><option value="" selected>선택하세요</option><option value="yes">허용: 1명 랜덤 중복</option><option value="no">허용 안 함: 1명 제외</option></select></label>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button onclick="saveSettings(true)">기본 설정 저장</button>
+    <button class="secondary" onclick="clearSettings()">기본 설정 비우기</button>
+    <span class="small">저장한 기본 설정은 이 브라우저에서 자동 불러오고, “현재 파일 저장”으로 저장하면 배포용 파일에도 포함됩니다.</span>
+  </div>
+</div>
+
+<div id="participantsTab" class="mainTab card noPrint">
+  <h2>2. 참가자 입력 / 저장 명단</h2>
+  <div class="row">
+    <input id="pName" placeholder="이름">
+    <select id="pGender"><option value="미설정">성별 선택</option><option value="남">남</option><option value="여">여</option></select>
+    <select id="pSkill"><option>선택 없음</option><option>초심자</option><option>C</option><option>B</option><option>A</option><option>S</option></select>
+    <select id="pDup"><option value="X">중복 참여 X</option><option value="O">중복 참여 O</option></select>
+    <button onclick="addParticipant()">참가자 추가</button>
+    <button class="secondary" onclick="loadSaved()">이전/현재 명단 불러오기</button>
+    <button class="danger" onclick="clearCurrentOnly()">현재 명단 비우기</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <select id="savedRoster" style="min-width:220px"></select>
+    <button class="secondary" onclick="loadRosterByName()">저장 명단 불러오기</button>
+    <input id="rosterName" placeholder="명단 이름 예: 제2회 정기대회" style="min-width:260px">
+    <button onclick="saveRosterAs()">이 이름으로 저장</button>
+    <button class="danger" onclick="deleteRosterByName()">선택 명단 삭제</button>
+  </div>
+  <div class="card" style="background:#f8fafc;margin-top:12px">
+    <h3>참가자 일괄 등록</h3>
+    <textarea id="bulkParticipants" rows="7" style="width:100%;box-sizing:border-box" placeholder="예시 1: 이름만 줄바꿈으로 입력&#10;구준표&#10;윤지후&#10;금잔디&#10;&#10;예시 2: 엑셀/콤마 형식으로 입력&#10;구준표,남,A,O&#10;윤지후,남,B,X&#10;금잔디	여	C	X"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button onclick="bulkAddParticipants()">일괄 등록</button>
+      <button class="secondary" onclick="bulkParticipants.value=''">입력창 비우기</button>
+      <span class="small">입력 형식: 이름 또는 이름,성별,실력,중복참여(O/X). 엑셀에서 복사한 탭 구분 형식도 지원합니다.</span>
+    </div>
+  </div>
+  <p class="small">이전 버전(v2~v4)의 참가자 저장 데이터와 저장 명단을 자동으로 읽습니다. 이름을 추가하거나 성별/실력/중복 참여 여부를 수정하면 저장됩니다. 이전 버전 명단도 자동으로 불러옵니다.</p>
+  <div id="participantTable"></div>
+</div>
+
+<div id="generateTab" class="mainTab card noPrint">
+  <h2>3. 생성</h2>
+  <div class="row">
+    <label><input type="checkbox" id="genMD" checked> 남복</label>
+    <label><input type="checkbox" id="genWD" checked> 여복</label>
+    <label><input type="checkbox" id="genXD" checked> 혼복</label>
+    <button class="green" onclick="generateAll()">예선 + 토너먼트 + 시간표 생성</button>
+    <button class="secondary" onclick="window.print()">인쇄 / PDF 저장</button>
+    <button class="secondary" onclick="downloadHTML()">현재 파일 저장</button>
+  </div>
+  <div id="message" class="small"></div>
+</div>
+
+<div id="resultsTab" class="mainTab card">
+  <h2>4. 결과 / 시간표 / 대진표</h2>
+  <div class="row noPrint" style="margin:10px 0 14px">
+    <button class="purple" onclick="exportResultsPDF()">PDF 저장</button>
+    <button class="green" onclick="exportResultsImage()">이미지 저장(PNG)</button>
+    <button class="secondary" onclick="exportResultsExcel()">엑셀 저장</button>
+    <span class="small">현재 생성된 팀, 예선 리그표, 토너먼트 대진표, 자동 시간표/경기수를 한 번에 내보냅니다.</span>
+  </div>
+  <div class="tabs noPrint" id="resultMenu">
+    <button class="active" onclick="showResultTab('teams', this)">생성된 팀</button>
+    <button onclick="showResultTab('groups', this)">예선 리그표</button>
+    <button onclick="showResultTab('brackets', this)">토너먼트 대진표</button>
+    <button onclick="showResultTab('schedule', this)">자동 시간표 / 경기수</button>
+  </div>
+  <div id="teams" class="resultTab active"><h2>생성된 팀</h2><div id="teamsOut"></div></div>
+  <div id="groups" class="resultTab"><h2>예선 리그표</h2><div id="groupsOut"></div></div>
+  <div id="brackets" class="resultTab"><h2>토너먼트 대진표</h2><div id="bracketsOut"></div></div>
+  <div id="schedule" class="resultTab"><h2>자동 시간표</h2><div id="scheduleOut"></div></div>
+</div>
+</div>
+<script id="embeddedData" type="application/json">{"settings":{},"participants":[],"rosters":{}}</script>
+<script>
+let participants=[]; let state={events:[], groups:{}, brackets:{}, teams:{}};
+const SETTINGS_KEY='kribb_badminton_settings_v14';
+function embeddedData(){try{return JSON.parse(document.getElementById('embeddedData').textContent||'{}')}catch(e){return {}}}
+function settingIds(){return ['eventTitle','eventDate','courtCount','startTime','matchMinutes','teamMode','skillMode','prelimMatchMode','groupCount','advanceCount','mixedTeamBasis','allowDuplicate','genMD','genWD','genXD']}
+function getSettings(){let o={}; settingIds().forEach(id=>{let el=document.getElementById(id); if(!el)return; o[id]=(el.type==='checkbox')?el.checked:el.value}); return o}
+function applySettings(o){if(!o)return; Object.entries(o).forEach(([id,val])=>{let el=document.getElementById(id); if(!el)return; if(el.type==='checkbox')el.checked=!!val; else el.value=val}); updatePrelimControls();}
+function saveSettings(showAlert=false){localStorage.setItem(SETTINGS_KEY,JSON.stringify(getSettings())); if(showAlert)alert('기본 설정이 저장되었습니다. 현재 파일 저장을 누르면 배포용 파일에도 이 설정이 포함됩니다.');}
+function loadSettings(){let data=readJSON(SETTINGS_KEY,'null'); if(!data){data=(embeddedData().settings)||{};} applySettings(data);}
+function clearSettings(){if(!confirm('기본 설정 입력값만 비울까요? 참가자 명단은 유지됩니다.'))return; settingIds().forEach(id=>{let el=document.getElementById(id); if(!el)return; if(el.type==='checkbox')el.checked=false; else el.value='';}); saveSettings(false); updatePrelimControls();}
+function attachSettingsAutosave(){settingIds().forEach(id=>{let el=document.getElementById(id); if(el)el.addEventListener('change',()=>saveSettings(false));}); ['eventTitle','eventDate','courtCount','startTime','matchMinutes','groupCount'].forEach(id=>{let el=document.getElementById(id); if(el)el.addEventListener('input',()=>saveSettings(false));});}
+const skillScore={'선택 없음':0,'초심자':1,'C':2,'B':3,'A':4,'S':5};
+const skillToOld={'선택 없음':'none','초심자':'beginner','C':'C','B':'B','A':'A','S':'S'};
+const oldToSkill={none:'선택 없음',beginner:'초심자',C:'C',B:'B',A:'A',S:'S'};
+function normalizeP(p){
+  if(!p)return null;
+  const gender=(p.gender==='M'||p.gender==='남')?'남':((p.gender==='F'||p.gender==='여')?'여':'미설정');
+  let skill=p.skill||'선택 없음';
+  skill=oldToSkill[skill]||skill;
+  if(skill==='C조')skill='C'; if(skill==='B조')skill='B'; if(skill==='A조')skill='A'; if(skill==='S조')skill='S';
+  if(!skillScore.hasOwnProperty(skill))skill='선택 없음';
+  return {name:p.name, gender, skill, duplicateEligible:(p.duplicateEligible==='O'||p.duplicateEligible===true||p.duplicate==='O')?'O':'X'};
+}
+function uniqueList(arr){let seen=new Set(), out=[]; arr.map(normalizeP).filter(p=>p&&p.name).forEach(p=>{if(!seen.has(p.name)){seen.add(p.name);out.push(p)}}); return out;}
+function save(){
+  participants=uniqueList(participants);
+  localStorage.setItem('bamin_participants_v6',JSON.stringify(participants));
+  localStorage.setItem('bamin_participants_v5',JSON.stringify(participants));
+  localStorage.setItem('badminton_current_players_v3',JSON.stringify(participants.map(p=>({name:p.name,gender:p.gender==='남'?'M':(p.gender==='여'?'F':''),skill:skillToOld[p.skill]||'none'}))));
+  renderParticipants(); renderRosterList();
+}
+function readJSON(key, fallback){try{return JSON.parse(localStorage.getItem(key)||fallback)}catch(e){return JSON.parse(fallback)}}
+function getLegacyCurrent(){
+  const keys=['bamin_participants_v6','bamin_participants_v5','badminton_current_players_v3','badminton_current_players_v2'];
+  for(const k of keys){const data=readJSON(k,'[]'); if(Array.isArray(data)&&data.length)return uniqueList(data)}
+  const embedded=(embeddedData().participants)||[];
+  if(Array.isArray(embedded)&&embedded.length)return uniqueList(embedded);
+  return [];
+}
+function loadSaved(){participants=getLegacyCurrent(); renderParticipants(); renderRosterList(); if(!participants.length)alert('저장된 참가자 명단이 없습니다.');}
+function initParticipants(){participants=getLegacyCurrent(); renderParticipants(); renderRosterList();}
+function clearCurrentOnly(){if(confirm('현재 화면의 명단만 비울까요? 저장 명단은 삭제되지 않습니다.')){participants=[];save();}}
+function addParticipant(){let name=pName.value.trim(); if(!name)return alert('이름을 입력하세요'); if(participants.some(p=>p.name===name))return alert('이미 있는 이름입니다'); participants.push({name,gender:pGender.value,skill:pSkill.value,duplicateEligible:pDup.value}); pName.value=''; save()}
+function parseGender(v){v=(v||'').trim().toLowerCase(); if(['남','남자','m','male'].includes(v))return '남'; if(['여','여자','f','female'].includes(v))return '여'; return '미설정'}
+function parseSkill(v){v=(v||'').trim(); const map={'없음':'선택 없음','선택없음':'선택 없음','무':'선택 없음','초':'초심자','초보':'초심자','초보자':'초심자','c':'C','b':'B','a':'A','s':'S','C조':'C','B조':'B','A조':'A','S조':'S'}; return map[v]||map[v.toLowerCase()]||(['선택 없음','초심자','C','B','A','S'].includes(v)?v:'선택 없음')}
+function parseDup(v){v=(v||'').trim().toUpperCase(); return (v==='O'||v==='Y'||v==='YES'||v==='TRUE'||v==='1'||v==='가능')?'O':'X'}
+function bulkAddParticipants(){
+  const text=(bulkParticipants.value||'').trim();
+  if(!text)return alert('일괄 등록할 참가자 명단을 입력하세요.');
+  const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  let added=0, skipped=0;
+  lines.forEach(line=>{
+    let parts=line.includes('\t')?line.split('\t'):line.split(',');
+    parts=parts.map(x=>x.trim()).filter((x,i)=>i===0||x!=='');
+    if(!parts[0] || ['이름','name','성명'].includes(parts[0].toLowerCase()))return;
+    const name=parts[0];
+    if(participants.some(p=>p.name===name)){skipped++; return;}
+    participants.push({name,gender:parseGender(parts[1]),skill:parseSkill(parts[2]),duplicateEligible:parseDup(parts[3])});
+    added++;
+  });
+  bulkParticipants.value='';
+  save();
+  alert(`일괄 등록 완료: ${added}명 추가, ${skipped}명 중복 제외`);
+}
+function removeP(i){participants.splice(i,1);save()}
+function updateP(i,k,v){participants[i][k]=v;save()}
+function renderParticipants(){let html='<table><tr><th>번호</th><th>이름</th><th>성별</th><th>실력</th><th>중복 참여</th><th>삭제</th></tr>';participants.forEach((p,i)=>{html+=`<tr><td>${i+1}</td><td>${p.name}</td><td><select onchange="updateP(${i},'gender',this.value)"><option value="미설정" ${p.gender==='미설정'?'selected':''}>미설정</option><option value="남" ${p.gender==='남'?'selected':''}>남</option><option value="여" ${p.gender==='여'?'selected':''}>여</option></select></td><td><select onchange="updateP(${i},'skill',this.value)">${['선택 없음','초심자','C','B','A','S'].map(s=>`<option ${p.skill===s?'selected':''}>${s}</option>`).join('')}</select></td><td><select onchange="updateP(${i},'duplicateEligible',this.value)"><option value="X" ${p.duplicateEligible!=='O'?'selected':''}>X</option><option value="O" ${p.duplicateEligible==='O'?'selected':''}>O</option></select></td><td><button class="danger" onclick="removeP(${i})">삭제</button></td></tr>`}); const m=participants.filter(p=>p.gender==='남').length, f=participants.filter(p=>p.gender==='여').length, u=participants.filter(p=>p.gender==='미설정').length, d=participants.filter(p=>p.duplicateEligible==='O').length; html+=`</table><div class="small">총 ${participants.length}명 · 남 ${m}명 · 여 ${f}명 · 미설정 ${u}명 · 중복 참여 가능 ${d}명</div>`; participantTable.innerHTML=html}
+function normalizeRosterArray(arr){return uniqueList((arr||[]).map(p=>({
+  name:(p.name||'').trim(),
+  gender:p.gender==='M'?'남':(p.gender==='F'?'여':(p.gender||'미설정')),
+  skill:oldToSkill[p.skill]||p.skill||'선택 없음',
+  duplicateEligible:p.duplicateEligible==='O'?'O':'X'
+})).filter(p=>p.name));}
+function getDeletedRosterNames(){return readJSON('bamin_deleted_rosters_v6','[]');}
+function setDeletedRosterNames(names){localStorage.setItem('bamin_deleted_rosters_v6',JSON.stringify([...new Set(names)]));}
+function getRosters(){
+  const current=readJSON('bamin_rosters_v6','{}');
+  const deleted=new Set(getDeletedRosterNames());
+  const legacySources=[
+    (embeddedData().rosters)||{},
+    readJSON('badminton_rosters_v2','{}'),
+    readJSON('badminton_rosters_v3','{}')
+  ];
+  let merged={};
+  legacySources.forEach(src=>Object.entries(src||{}).forEach(([name,arr])=>{if(!deleted.has(name)&&!merged[name])merged[name]=normalizeRosterArray(arr)}));
+  Object.entries(current||{}).forEach(([name,arr])=>{merged[name]=normalizeRosterArray(arr)});
+  return merged;
+}
+function setRosters(r){
+  const clean={};
+  Object.entries(r||{}).forEach(([name,arr])=>{if(name&&name.trim())clean[name.trim()]=normalizeRosterArray(arr)});
+  localStorage.setItem('bamin_rosters_v6',JSON.stringify(clean));
+  renderRosterList();
+}
+function escapeOpt(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderRosterList(selectedName=''){
+  const sel=document.getElementById('savedRoster');
+  if(!sel)return;
+  const r=getRosters();
+  const names=Object.keys(r).sort((a,b)=>a.localeCompare(b,'ko'));
+  sel.innerHTML=names.length?names.map(n=>`<option value="${escapeOpt(n)}" ${n===selectedName?'selected':''}>${escapeOpt(n)}</option>`).join(''):'<option value="">저장된 명단 없음</option>';
+}
+function saveRosterAs(){
+  const input=document.getElementById('rosterName');
+  const name=(input&&input.value||'').trim();
+  if(!name)return alert('명단 이름을 입력해주세요.');
+  const r=getRosters();
+  r[name]=normalizeRosterArray(participants);
+  setRosters(r);
+  setDeletedRosterNames(getDeletedRosterNames().filter(n=>n!==name));
+  renderRosterList(name);
+  alert('명단이 저장되었습니다.');
+}
+function loadRosterByName(){
+  const sel=document.getElementById('savedRoster');
+  const name=sel?sel.value:'';
+  const r=getRosters();
+  if(!name||!r[name])return alert('불러올 저장 명단이 없습니다.');
+  participants=normalizeRosterArray(r[name]);
+  save();
+  renderRosterList(name);
+}
+function deleteRosterByName(){
+  const sel=document.getElementById('savedRoster');
+  const name=sel?sel.value:'';
+  const r=getRosters();
+  if(!name||!r[name])return alert('삭제할 저장 명단이 없습니다.');
+  if(confirm('선택한 저장 명단을 삭제할까요?')){
+    delete r[name];
+    setDeletedRosterNames([...getDeletedRosterNames(),name]);
+    setRosters(r);
+    alert('삭제되었습니다.');
+  }
+}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function duplicateOneIfOdd(list){let arr=[...list]; if(arr.length%2===1 && allowDuplicate && allowDuplicate.value==='yes' && arr.length>0){let candidates=arr.filter(p=>p.duplicateEligible==='O'); if(candidates.length){let dup=candidates[Math.floor(Math.random()*candidates.length)]; arr.push({...dup, duplicated:true});}} return arr}
+function pairList(list, mode){let arr=duplicateOneIfOdd(list); if(mode==='similar')arr.sort((a,b)=>skillScore[a.skill]-skillScore[b.skill]); else if(mode==='different'||mode==='balanced')arr.sort((a,b)=>skillScore[b.skill]-skillScore[a.skill]); else arr=shuffle(arr); let teams=[]; if(mode==='different'||mode==='balanced'){while(arr.length>1){teams.push([arr.shift(),arr.pop()])}} else {for(let i=0;i+1<arr.length;i+=2)teams.push([arr[i],arr[i+1]])} return teams}
+function makeMixedTeams(men,women){
+  let ms=shuffle(men), ws=shuffle(women), teams=[];
+  if(!ms.length||!ws.length)return teams;
+  let basis=(window.mixedTeamBasis&&mixedTeamBasis.value)||'max';
+  let n=basis==='min'?Math.min(ms.length,ws.length):Math.max(ms.length,ws.length);
+  for(let i=0;i<n;i++){
+    let m=ms[i%ms.length], w=ws[i%ws.length];
+    let mp=i>=ms.length?{...m, duplicated:true}:m;
+    let wp=i>=ws.length?{...w, duplicated:true}:w;
+    teams.push({id:'혼복'+(i+1),event:'혼복',players:[mp,wp],name:mp.name+', '+wp.name});
+  }
+  return teams;
+}
+
+function hasPrelim(){return !!(window.prelimMatchMode && prelimMatchMode.value && prelimMatchMode.value!=='0')}
+function updatePrelimControls(){
+  const on=hasPrelim();
+  if(window.groupCount){groupCount.disabled=!on; groupCountWrap.style.opacity=on?'1':'0.45';}
+  if(window.advanceCount){advanceCount.disabled=!on; advanceCountWrap.style.opacity=on?'1':'0.45';}
+  const msg=document.getElementById('message');
+  if(msg && !on) msg.innerHTML='<span class="ok">예선 없음:</span> 예선 조 수와 진출팀 설정은 무시되고, 생성된 모든 팀이 바로 토너먼트에 들어갑니다.';
+}
+
+function makeTeams(){let men=participants.filter(p=>p.gender==='남'), women=participants.filter(p=>p.gender==='여'), mode=skillMode.value||'ignore'; let teams={}; if(genMD.checked)teams.MD=pairList(men,mode).map((t,i)=>({id:'남복'+(i+1),event:'남복',players:t,name:t.map(x=>x.name).join(', ')})); if(genWD.checked)teams.WD=pairList(women,mode).map((t,i)=>({id:'여복'+(i+1),event:'여복',players:t,name:t.map(x=>x.name).join(', ')})); if(genXD.checked)teams.XD=makeMixedTeams(men,women); return teams}
+function teamNames(t){return (t.players||[]).map(p=>p.name)}
+function groupHasAnyPlayer(g,t){let names=new Set(g.teams.flatMap(teamNames)); return teamNames(t).some(n=>names.has(n))}
+function splitGroups(teams,n){
+  let gs=Array.from({length:Math.max(1,Math.min(n,teams.length))},(_,i)=>({name:String.fromCharCode(65+i)+'조',teams:[],matches:[]}));
+  let shuffled=shuffle(teams);
+  // 중복 참여자가 포함된 팀도 같은 조에 들어가지 않도록, 배치할 때 같은 이름이 이미 있는 조는 피한다.
+  shuffled.forEach(t=>{
+    let possible=gs.filter(g=>!groupHasAnyPlayer(g,t));
+    let target=(possible.length?possible:gs).slice().sort((a,b)=>a.teams.length-b.teams.length)[0];
+    target.teams.push(t);
+  });
+  return gs;
+}
+function makeMatch(group,eventName,a,b){return {event:eventName,stage:'예선',group:group.name,label:`${group.name} 예선`,a,b,players:[...a.players,...b.players].map(p=>p.name),score:'',winner:''}}
+function rrMatches(group,eventName){let m=[]; let ts=group.teams; for(let i=0;i<ts.length;i++)for(let j=i+1;j<ts.length;j++)m.push(makeMatch(group,eventName,ts[i],ts[j])); return m}
+function selectedPrelimMatches(group,eventName){
+  let mode=(window.prelimMatchMode&&prelimMatchMode.value)||'full';
+  if(mode==='full')return rrMatches(group,eventName);
+  let perTeam=parseInt(mode,10)||0;
+  if(perTeam<=0)return [];
+  let ts=group.teams, pairs=[];
+  for(let i=0;i<ts.length;i++)for(let j=i+1;j<ts.length;j++)pairs.push([ts[i],ts[j]]);
+  pairs=shuffle(pairs);
+  let counts=Object.fromEntries(ts.map(t=>[t.id,0])), out=[];
+  while(true){
+    let added=false;
+    pairs=pairs.sort((p,q)=>(counts[p[0].id]+counts[p[1].id])-(counts[q[0].id]+counts[q[1].id]));
+    for(let i=0;i<pairs.length;i++){
+      let [a,b]=pairs[i];
+      if(counts[a.id]<perTeam && counts[b.id]<perTeam){out.push(makeMatch(group,eventName,a,b)); counts[a.id]++; counts[b.id]++; pairs.splice(i,1); added=true; break;}
+    }
+    if(!added || Object.values(counts).every(v=>v>=perTeam))break;
+  }
+  return out;
+}
+function buildBracket(seedTeams,eventName){let arr=shuffle(seedTeams); let pow=1; while(pow<arr.length)pow*=2; while(arr.length<pow)arr.push(null); let rounds=[]; let cur=arr, r=1; while(cur.length>1){let matches=[]; for(let i=0;i<cur.length;i+=2){let a=cur[i],b=cur[i+1]; matches.push({event:eventName,stage:r===1?'토너먼트 1라운드':(cur.length===2?'결승':'토너먼트'),round:r,label:cur.length===2?`${eventName} 결승`:`${eventName} ${cur.length}강`,a,b,players:[...(a?a.players:[]),...(b?b.players:[])].map(p=>p.name),score:'',winner:a&&!b?a.name:''});} rounds.push(matches); cur=matches.map((x,i)=>({id:`${eventName}_R${r}_${i}`,event:eventName,players:[],name:x.winner||`승자 ${i+1}`})); r++; } return rounds}
+function participantsOverlap(ev, slot){let s=new Set(slot.filter(Boolean).flatMap(e=>e.players||[])); return (ev.players||[]).some(p=>s.has(p))}
+function participantsInEvents(list){return new Set((list||[]).filter(Boolean).flatMap(e=>e.players||[]))}
+function conflictsWithPrevRound(ev, prevPlayers){return (ev.players||[]).some(p=>prevPlayers.has(p))}
+function splitSchedulePhases(events){
+  // 경기 순서 원칙:
+  // 1) 모든 종목의 예선 경기를 먼저 완료
+  // 2) 토너먼트는 라운드 순서대로 진행
+  // 3) 결승은 모든 선행 경기 이후 마지막 단계로 진행
+  const prelim=[], finals=[], byRound={};
+  events.forEach(ev=>{
+    if(ev.stage==='예선') prelim.push(ev);
+    else if((ev.stage||'').includes('결승')) finals.push(ev);
+    else {let r=ev.round||1; if(!byRound[r])byRound[r]=[]; byRound[r].push(ev);}
+  });
+  const phases=[];
+  if(prelim.length) phases.push({name:'예선 전체 완료', events:prelim});
+  Object.keys(byRound).map(Number).sort((a,b)=>a-b).forEach(r=>phases.push({name:`토너먼트 ${r}라운드`, events:byRound[r]}));
+  if(finals.length) phases.push({name:'결승', events:finals});
+  return phases;
+}
+function scheduleOnePhase(phaseEvents, ctx){
+  let uns=[...phaseEvents], rows=[];
+  while(uns.length){
+    let row=[];
+    // 1차: 같은 라운드 중복 없음 + 직전 라운드 출전자 제외(휴식 우선)
+    for(let c=1;c<=ctx.courts;c++){
+      let idx=uns.findIndex(ev=>!participantsOverlap(ev,row) && !conflictsWithPrevRound(ev,ctx.prevPlayers));
+      if(idx<0) idx=uns.findIndex(ev=>!participantsOverlap(ev,row)); // 불가피하면 휴식 조건만 완화
+      if(idx>=0){let ev=uns.splice(idx,1)[0]; ev.court=c; ev.order=ctx.order; row.push(ev)} else row.push(null);
+    }
+    rows.push({order:ctx.order,time:ctx.time,phase:ctx.phaseName,events:row});
+    ctx.prevPlayers=participantsInEvents(row);
+    ctx.time+=ctx.mins; ctx.order++;
+    if(ctx.order>800)break;
+  }
+  return rows;
+}
+function autoSchedule(events){
+  let courts=+courtCount.value||3, start=startTime.value||'18:30', mins=+matchMinutes.value||15;
+  let [h,m]=start.split(':').map(Number), ctx={courts,mins,time:h*60+m,order:1,prevPlayers:new Set(),phaseName:''};
+  let rows=[];
+  splitSchedulePhases(events).forEach(ph=>{
+    // 단계가 바뀌어도 직전 라운드 출전자에게 가능하면 1라운드 휴식이 생기도록 prevPlayers 유지
+    ctx.phaseName=ph.name;
+    rows.push(...scheduleOnePhase(ph.events,ctx));
+  });
+  return rows;
+}
+function fmtTime(t){let h=Math.floor(t/60),m=t%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`}
+function generateAll(){
+  if(participants.length<4)return alert('참가자를 4명 이상 입력하세요');
+  if(!courtCount.value)return alert('코트 수를 입력해주세요.');
+  if(!matchMinutes.value)return alert('경기 시간(분)을 입력해주세요.');
+  if(!startTime.value)return alert('시작 시간을 입력해주세요.');
+  if(!teamMode.value)return alert('팀 방식을 선택해주세요.');
+  if(!skillMode.value)return alert('팀 실력 배정을 선택해주세요.');
+  if(!prelimMatchMode.value)return alert('예선 경기 수를 선택해주세요.');
+  if(hasPrelim() && !groupCount.value)return alert('예선 조 수를 입력해주세요.');
+  if(hasPrelim() && !advanceCount.value)return alert('토너먼트 진출팀 수를 선택해주세요.');
+  if(!mixedTeamBasis.value)return alert('혼복 팀 수 기준을 선택해주세요.');
+  if(!allowDuplicate.value)return alert('홀수 인원 중복 참여 여부를 선택해주세요.');
+  saveSettings(false);
+  updatePrelimControls();
+  const prelimOn=hasPrelim();
+  state={events:[],groups:{},brackets:{},teams:makeTeams()};
+  let allEvents=[]; let teamHtml=''; const map={MD:'남복',WD:'여복',XD:'혼복'};
+  for(const k of Object.keys(state.teams)){
+    teamHtml+=`<h3>${map[k]}</h3>`+state.teams[k].map(t=>`<span class="teamBox">${t.id}: ${t.name}</span>`).join('');
+    if(prelimOn){
+      let gs=splitGroups(state.teams[k],+groupCount.value||2);
+      state.groups[k]=gs;
+      gs.forEach(g=>{g.matches=selectedPrelimMatches(g,map[k]); allEvents.push(...g.matches)});
+      let seeds=[];
+      gs.forEach(g=>{let adv=+advanceCount.value||2; for(let i=0;i<Math.min(adv,g.teams.length);i++)seeds.push({...g.teams[i],name:`${g.name} ${i+1}위`})});
+      state.brackets[k]=buildBracket(seeds,map[k]);
+    }else{
+      state.groups[k]=[];
+      state.brackets[k]=buildBracket(state.teams[k],map[k]);
+    }
+    state.brackets[k].flat().forEach(x=>allEvents.push(x));
+  }
+  state.events=allEvents;
+  teamsOut.innerHTML=teamHtml||'<p>생성된 팀이 없습니다.</p>';
+  renderGroups(); renderBrackets(); renderSchedule(autoSchedule(allEvents));
+  message.innerHTML=`<span class="ok">생성 완료:</span> 총 ${allEvents.length}경기, 코트 ${courtCount.value}개 기준. ${prelimOn?'예선 경기 후 상위팀 토너먼트로 진행합니다.':'예선 없이 모든 팀이 바로 토너먼트로 진행합니다.'} 예선 완료 후 토너먼트/결승 순서로, 같은 시간대 중복 없이 가능하면 한 라운드 휴식이 생기도록 배치했습니다.`;
+}
+function renderGroups(){
+  if(!hasPrelim()){
+    groupsOut.innerHTML='<p class="small"><b>예선 없음</b>으로 선택되어 예선 리그표를 생성하지 않았습니다. 생성된 팀은 바로 토너먼트 대진표에 배정됩니다.</p>';
+    return;
+  }
+  let html=''; const map={MD:'남복',WD:'여복',XD:'혼복'};
+  for(const k in state.groups){
+    html+=`<h3>${map[k]} 예선</h3>`;
+    state.groups[k].forEach(g=>{
+      html+=`<h4>${g.name}</h4><table><tr><th>${g.name}</th>${g.teams.map(t=>`<th>${t.id}<br>${t.name}</th>`).join('')}<th>승/패</th><th>득실</th><th>순위</th></tr>`;
+      g.teams.forEach((t,i)=>{html+=`<tr><th>${t.id}<br>${t.name}</th>`; g.teams.forEach((u,j)=>{html+=i===j?'<td style="background:linear-gradient(45deg,transparent 49%,#333 50%,transparent 51%)"></td>':`<td class="editable" contenteditable="true">${i<j?'예선':''}</td>`}); html+='<td class="editable" contenteditable="true">/</td><td class="editable" contenteditable="true"></td><td class="editable" contenteditable="true"></td></tr>'});
+      html+='</table><div class="small">순위 기준: 1) 승수 2) 득실차 3) 다득점. 예선 경기 수는 기본 설정에서 선택할 수 있고, 결과 입력은 표에 직접 작성하세요.</div>';
+    });
+  }
+  groupsOut.innerHTML=html;
+}
+function renderBrackets(){let html=''; for(const k in state.brackets){let eventName={MD:'남복',WD:'여복',XD:'혼복'}[k]; html+=`<h3>${eventName} 대진표</h3><div class="bracket">`; state.brackets[k].forEach((round,ri)=>{html+='<div class="round">'; round.forEach((m,mi)=>{html+=`<div class="match"><div class="title">${m.label}</div><div class="slot ${!m.a?'bye':''}" contenteditable="true">${m.a?m.a.name:'부전승'}</div><div class="slot ${!m.b?'bye':''}" contenteditable="true">${m.b?m.b.name:'부전승'}</div></div>`}); html+='</div>'}); html+='</div>'} bracketsOut.innerHTML=html}
+
+function calcPlayerGameCounts(events){
+  let counts={}; participants.forEach(p=>counts[p.name]=0);
+  events.forEach(ev=>{(ev.players||[]).forEach(name=>{counts[name]=(counts[name]||0)+1})});
+  return counts;
+}
+function renderGameCountTable(events){
+  const counts=calcPlayerGameCounts(events);
+  let names=Object.keys(counts).sort((a,b)=>counts[b]-counts[a] || a.localeCompare(b,'ko'));
+  let html='<h3>참가자별 총 게임 참여 수</h3><table><tr><th>참가자</th><th>총 게임 수</th></tr>';
+  names.forEach(n=>{html+=`<tr><td>${n}</td><td>${counts[n]}</td></tr>`});
+  html+='</table><p class="small">홀수 인원 중복 참여를 허용한 경우에도 참가자 입력/저장 명단에서 중복 참여가 O로 설정된 참가자 중 1명만 랜덤으로 한 번 더 포함됩니다. O가 없으면 중복 참여 없이 1명은 팀 구성에서 제외될 수 있습니다.</p>';
+  return html;
+}
+
+function renderSchedule(rows){let mins=+matchMinutes.value||15; let html=`<table class="scheduleTable"><tr><th>순서</th><th>단계</th><th>시간</th>`; for(let c=1;c<=+(courtCount.value||3);c++)html+=`<th>${c}코트</th>`; html+='</tr>'; rows.forEach(r=>{html+=`<tr><td>${r.order}</td><td>${r.phase||''}</td><td>${fmtTime(r.time)}<br>- ${fmtTime(r.time+mins)}</td>`; r.events.forEach(ev=>{html+=`<td class="${ev&&ev.stage.includes('결승')?'yellow':''}">${ev?`<b>${ev.label}</b><br>${ev.a?ev.a.name:'부전승'} - ${ev.b?ev.b.name:'부전승'}`:''}</td>`}); html+='</tr>'}); html+='</table><p class="small">시간표는 모든 예선을 먼저 끝낸 뒤 토너먼트 라운드와 결승을 순서대로 배치합니다. 같은 라운드에서 같은 참가자는 겹치지 않고, 가능한 경우 직전 라운드 출전자는 한 라운드 쉬도록 우선 배정합니다.</p>'; html+=renderGameCountTable(state.events||[]); scheduleOut.innerHTML=html}
+function showMainTab(id, btn){
+  const target=document.getElementById(id);
+  if(!target)return;
+  document.querySelectorAll('.mainTab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#mainMenu button').forEach(x=>x.classList.remove('active'));
+  target.classList.add('active');
+  if(!btn){
+    btn=[...document.querySelectorAll('#mainMenu button')].find(b=>(b.getAttribute('onclick')||'').includes(id));
+  }
+  if(btn){btn.classList.add('active'); btn.scrollIntoView({inline:'center',block:'nearest'});}
+}
+function showResultTab(id, btn){
+  const target=document.getElementById(id);
+  if(!target)return;
+  document.querySelectorAll('.resultTab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#resultMenu button').forEach(x=>x.classList.remove('active'));
+  target.classList.add('active');
+  if(!btn){
+    btn=[...document.querySelectorAll('#resultMenu button')].find(b=>(b.getAttribute('onclick')||'').includes(id));
+  }
+  if(btn){btn.classList.add('active'); btn.scrollIntoView({inline:'center',block:'nearest'});}
+}
+
+function safeFileName(name){
+  const base=(name||eventTitle.value||'KRIBB_배드민턴대회').trim()||'KRIBB_배드민턴대회';
+  return base.replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,'_');
+}
+function getExportTitle(){
+  const title=(eventTitle.value||'KRIBB 배드민턴 대회').trim();
+  const date=(eventDate.value||'').trim();
+  return date?`${title} (${date})`:title;
+}
+function buildExportHTML(){
+  const info=[];
+  if(eventTitle.value)info.push(['대회명',eventTitle.value]);
+  if(eventDate.value)info.push(['날짜',eventDate.value]);
+  if(startTime.value)info.push(['시작 시간',startTime.value]);
+  if(courtCount.value)info.push(['코트 수',courtCount.value]);
+  if(matchMinutes.value)info.push(['경기 시간',matchMinutes.value+'분']);
+  let infoHtml=info.length?'<table><tr><th>항목</th><th>내용</th></tr>'+info.map(r=>`<tr><td>${escapeHtml(r[0])}</td><td>${escapeHtml(r[1])}</td></tr>`).join('')+'</table>':'';
+  return `<div class="exportDoc"><h1>🏸 ${escapeHtml(getExportTitle())}</h1>${infoHtml}<h2>생성된 팀</h2>${teamsOut.innerHTML||'<p>생성된 팀이 없습니다.</p>'}<h2>예선 리그표</h2>${groupsOut.innerHTML||'<p>예선 리그표가 없습니다.</p>'}<h2>토너먼트 대진표</h2>${bracketsOut.innerHTML||'<p>대진표가 없습니다.</p>'}<h2>자동 시간표 / 참가자별 경기수</h2>${scheduleOut.innerHTML||'<p>시간표가 없습니다.</p>'}</div>`;
+}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function exportResultsPDF(){
+  if(!(teamsOut.innerHTML||groupsOut.innerHTML||bracketsOut.innerHTML||scheduleOut.innerHTML))return alert('먼저 결과를 생성해주세요.');
+  const w=window.open('','_blank');
+  const css=`body{font-family:Arial,'Noto Sans KR',sans-serif;margin:18px;color:#111} h1{font-size:24px} h2{margin-top:24px;border-left:6px solid #2563eb;padding-left:10px} table{border-collapse:collapse;width:100%;margin:8px 0} th,td{border:1px solid #333;padding:7px;text-align:center;vertical-align:middle} th{background:#f1f5f9}.small{font-size:12px;color:#555}.teamBox{display:inline-block;border:1px solid #ddd;border-radius:8px;padding:6px 10px;margin:4px}.bracket{display:flex;gap:22px;overflow:visible;padding:10px}.round{min-width:180px;display:flex;flex-direction:column;gap:12px}.match{border:2px solid #111;border-radius:8px}.match .title{background:#f1f5f9;padding:5px;font-weight:700;text-align:center;border-bottom:1px solid #111}.slot{min-height:28px;padding:7px;border-top:1px solid #ccc}.yellow{background:#fff200;font-weight:800}@page{size:A4 landscape;margin:10mm}`;
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KRIBB 배드민턴 대회 팀 자동 생성기</title><style>${css}</style>
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head><body>${buildExportHTML()}<script>window.onload=()=>{setTimeout(()=>window.print(),300)}<\/script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+      console.log('Service worker registration failed:', err);
+    });
+  });
+}
+<\/script>
+</body></html>`);
+  w.document.close();
+}
+function exportResultsExcel(){
+  if(!(teamsOut.innerHTML||groupsOut.innerHTML||bracketsOut.innerHTML||scheduleOut.innerHTML))return alert('먼저 결과를 생성해주세요.');
+  const css=`table{border-collapse:collapse}th,td{border:1px solid #333;padding:6px;text-align:center}th{background:#f1f5f9}.teamBox{display:block;margin:3px}`;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>${css}</style>
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head><body>${buildExportHTML()}
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+      console.log('Service worker registration failed:', err);
+    });
+  });
+}
+<\/script>
+</body></html>`;
+  const blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=safeFileName()+'_결과.xls';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function exportResultsImage(){
+  if(!(teamsOut.innerHTML||groupsOut.innerHTML||bracketsOut.innerHTML||scheduleOut.innerHTML))return alert('먼저 결과를 생성해주세요.');
+  const holder=document.createElement('div');
+  holder.style.position='fixed';holder.style.left='-10000px';holder.style.top='0';holder.style.width='1400px';holder.style.background='white';holder.style.padding='20px';holder.style.fontFamily="Arial,'Noto Sans KR',sans-serif";
+  holder.innerHTML=buildExportHTML();
+  document.body.appendChild(holder);
+  const width=holder.scrollWidth, height=holder.scrollHeight;
+  const serialized=new XMLSerializer().serializeToString(holder);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>body{margin:0}h1{font-size:28px}h2{margin-top:24px;border-left:6px solid #2563eb;padding-left:10px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #333;padding:7px;text-align:center;vertical-align:middle}th{background:#f1f5f9}.small{font-size:12px;color:#555}.teamBox{display:inline-block;border:1px solid #ddd;border-radius:8px;padding:6px 10px;margin:4px}.bracket{display:flex;gap:22px;overflow:visible;padding:10px}.round{min-width:180px;display:flex;flex-direction:column;gap:12px}.match{border:2px solid #111;border-radius:8px}.match .title{background:#f1f5f9;padding:5px;font-weight:700;text-align:center;border-bottom:1px solid #111}.slot{min-height:28px;padding:7px;border-top:1px solid #ccc}.yellow{background:#fff200;font-weight:800}</style>${serialized}</div></foreignObject></svg>`;
+  const img=new Image();
+  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  img.onload=function(){
+    const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url); document.body.removeChild(holder);
+    const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=safeFileName()+'_결과.png';a.click();
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);document.body.removeChild(holder);alert('이미지 저장에 실패했습니다. PDF 저장 또는 엑셀 저장을 이용해주세요.');};
+  img.src=url;
+}
+
+function downloadHTML(){
+  saveSettings(false);
+  const clone=document.documentElement.cloneNode(true);
+  // 현재 입력/선택/체크 상태를 HTML 속성으로 반영
+  clone.querySelectorAll('input, select, textarea').forEach(el=>{
+    const cur=document.getElementById(el.id);
+    if(!cur)return;
+    if(el.tagName==='SELECT'){
+      [...el.options].forEach(o=>o.removeAttribute('selected'));
+      const opt=[...el.options].find(o=>o.value===cur.value);
+      if(opt)opt.setAttribute('selected','selected');
+    }else if(el.type==='checkbox'){
+      if(cur.checked)el.setAttribute('checked','checked'); else el.removeAttribute('checked');
+    }else{
+      el.setAttribute('value',cur.value||'');
+    }
+  });
+  const dataNode=clone.querySelector('#embeddedData');
+  if(dataNode){
+    dataNode.textContent=JSON.stringify({settings:getSettings(),participants:participants,rosters:getRosters()});
+  }
+  let blob=new Blob(['<!doctype html>\n'+clone.outerHTML],{type:'text/html'});
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click()
+}
+attachSettingsAutosave(); loadSettings(); initParticipants(); renderRosterList(); updatePrelimControls();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+      console.log('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body></html>
