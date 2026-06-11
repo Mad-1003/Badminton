@@ -524,47 +524,14 @@ function exportResultsPDF(){
   if(!(teamsOut.innerHTML||groupsOut.innerHTML||bracketsOut.innerHTML||scheduleOut.innerHTML))return alert('먼저 결과를 생성해주세요.');
   const w=window.open('','_blank');
   const css=`body{font-family:Arial,'Noto Sans KR',sans-serif;margin:18px;color:#111} h1{font-size:24px} h2{margin-top:24px;border-left:6px solid #2563eb;padding-left:10px} table{border-collapse:collapse;width:100%;margin:8px 0} th,td{border:1px solid #333;padding:7px;text-align:center;vertical-align:middle} th{background:#f1f5f9}.small{font-size:12px;color:#555}.teamBox{display:inline-block;border:1px solid #ddd;border-radius:8px;padding:6px 10px;margin:4px}.bracket{display:flex;gap:22px;overflow:visible;padding:10px}.round{min-width:180px;display:flex;flex-direction:column;gap:12px}.match{border:2px solid #111;border-radius:8px}.match .title{background:#f1f5f9;padding:5px;font-weight:700;text-align:center;border-bottom:1px solid #111}.slot{min-height:28px;padding:7px;border-top:1px solid #ccc}.yellow{background:#fff200;font-weight:800}@page{size:A4 landscape;margin:10mm}`;
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KRIBB 배드민턴 대회 팀 자동 생성기</title><style>${css}</style>
-  <meta name="theme-color" content="#0f766e">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-</head><body>${buildExportHTML()}<script>window.onload=()=>{setTimeout(()=>window.print(),300)}<\/script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
-      console.log('Service worker registration failed:', err);
-    });
-  });
-}
-</script>
-</body></html>`);
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>KRIBB 배드민턴 대회 팀 자동 생성기</title><style>${css}</style></head><body>${buildExportHTML()}</body></html>`);
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} },300);
   w.document.close();
 }
 function exportResultsExcel(){
   if(!(teamsOut.innerHTML||groupsOut.innerHTML||bracketsOut.innerHTML||scheduleOut.innerHTML))return alert('먼저 결과를 생성해주세요.');
   const css=`table{border-collapse:collapse}th,td{border:1px solid #333;padding:6px;text-align:center}th{background:#f1f5f9}.teamBox{display:block;margin:3px}`;
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>${css}</style>
-  <meta name="theme-color" content="#0f766e">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="KRIBB 배드민턴">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-</head><body>${buildExportHTML()}
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
-      console.log('Service worker registration failed:', err);
-    });
-  });
-}
-</script>
-</body></html>`;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>${css}</style></head><body>${buildExportHTML()}</body></html>`;
   const blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -615,7 +582,7 @@ function downloadHTML(){
     dataNode.textContent=JSON.stringify({settings:getSettings(),participants:participants,rosters:getRosters()});
   }
   let blob=new Blob(['<!doctype html>\n'+clone.outerHTML],{type:'text/html'});
-  let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='KRIBB_badminton_scheduler_v17_export_results.html';a.click()
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='KRIBB_badminton_scheduler_v21_mobile_script_fixed.html';a.click()
 }
 attachSettingsAutosave(); loadSettings(); initParticipants(); renderRosterList(); updatePrelimControls();
 </script>
